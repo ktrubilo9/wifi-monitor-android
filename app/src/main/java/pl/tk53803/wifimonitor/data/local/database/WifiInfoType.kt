@@ -8,6 +8,7 @@ import androidx.room.PrimaryKey
 data class WifiInfoType(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     @ColumnInfo(name = "ssid") val ssid: String,
+    @ColumnInfo(name = "bssid") val bssid: String,
     @ColumnInfo(name = "rssi") val rssi: Int,
     @ColumnInfo(name = "link_speed") val linkSpeed: Int,
     @ColumnInfo(name = "frequency") val frequency: Int,
