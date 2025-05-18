@@ -16,19 +16,16 @@
 
 package pl.tk53803.wifimonitor.ui
 
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import pl.tk53803.wifimonitor.ui.dataitemtype.DataItemTypeScreen
 import pl.tk53803.wifimonitor.ui.dataitemtype.HomeScreen
 import pl.tk53803.wifimonitor.ui.screens.PermissionRequestScreen
 
 @Composable
-fun MainNavigation() {
+fun MainNavigation(paddingValues: PaddingValues) {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = "permissions") {
@@ -41,7 +38,7 @@ fun MainNavigation() {
         }
 
         composable("main") {
-            HomeScreen()
+            HomeScreen(paddingValues = paddingValues)
         }
     }
 }

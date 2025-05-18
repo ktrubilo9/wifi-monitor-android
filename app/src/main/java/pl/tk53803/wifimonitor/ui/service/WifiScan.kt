@@ -5,21 +5,33 @@ import android.content.Context
 import android.content.IntentFilter
 import android.net.wifi.WifiManager
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import pl.tk53803.wifimonitor.data.WifiRepository
 import pl.tk53803.wifimonitor.ui.receiver.WifiScanReceiver
 import javax.inject.Inject
 
 class WifiScan @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val wifiManager: WifiManager,
     private val repository: WifiRepository
 ) {
+    @Inject lateinit var wifiManager: WifiManager
     private var receiver: BroadcastReceiver? = null
+
+    private var scanJob: Job? = null
 
     fun start() {
         receiver = WifiScanReceiver(wifiManager, repository)
         context.registerReceiver(receiver, IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
-        wifiManager.startScan()
+        scanJob = CoroutineScope(Dispatchers.IO).launch {
+            while (true) {
+                wifiManager.startScan()
+                delay(5000)
+            }
+        }
     }
 
     fun stop() {
@@ -27,5 +39,7 @@ class WifiScan @Inject constructor(
             context.unregisterReceiver(it)
             receiver = null
         }
+        scanJob?.cancel()
+        scanJob = null
     }
 }
