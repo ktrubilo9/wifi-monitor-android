@@ -13,4 +13,7 @@ interface WifiInfoDao {
 
     @Query("SELECT * FROM wifi_info ORDER BY timestamp DESC")
     fun getAll(): Flow<List<WifiInfoType>>
+
+    @Query("SELECT * FROM wifi_info WHERE bssid = :bssid ORDER BY timestamp DESC")
+    fun getByBssid(bssid: String): Flow<List<WifiInfoType>>
 }

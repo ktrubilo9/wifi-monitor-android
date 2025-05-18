@@ -1,4 +1,4 @@
-package pl.tk53803.wifimonitor.ui.dataitemtype
+package pl.tk53803.wifimonitor.ui.screens
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,7 +15,8 @@ class WifiViewModel @Inject constructor(
     private val repository: WifiRepository
 ) : ViewModel() {
     val wifiHistory: StateFlow<List<WifiInfoType>> = repository.getAll()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        .stateIn(viewModelScope, SharingStarted.Companion.WhileSubscribed(5000), emptyList())
 
     suspend fun insert(wifi: WifiInfoType) = repository.insert(wifi)
+    fun getByBssid(bssid: String) = repository.getByBssid(bssid)
 }

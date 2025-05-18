@@ -10,4 +10,5 @@ class WifiRepository @Inject constructor(
 ) {
     suspend fun insert(wifi: WifiInfoType) = dao.insert(wifi)
     fun getAll(): Flow<List<WifiInfoType>> = dao.getAll()
+    fun getByBssid(bssid: String): Flow<List<WifiInfoType>> = dao.getByBssid(bssid)
 }
