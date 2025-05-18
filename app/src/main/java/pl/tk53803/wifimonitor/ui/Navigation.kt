@@ -24,6 +24,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import pl.tk53803.wifimonitor.ui.dataitemtype.DataItemTypeScreen
+import pl.tk53803.wifimonitor.ui.dataitemtype.HomeScreen
 import pl.tk53803.wifimonitor.ui.screens.PermissionRequestScreen
 
 @Composable
@@ -40,7 +41,7 @@ fun MainNavigation() {
         }
 
         composable("main") {
-            DataItemTypeScreen(modifier = Modifier.padding(16.dp))
+            HomeScreen()
         }
     }
 }
