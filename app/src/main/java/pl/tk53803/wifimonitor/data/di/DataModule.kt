@@ -27,23 +27,23 @@ import pl.tk53803.wifimonitor.data.DefaultDataItemTypeRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Module
-@InstallIn(SingletonComponent::class)
-interface DataModule {
-
-    @Singleton
-    @Binds
-    fun bindsDataItemTypeRepository(
-        dataItemTypeRepository: DefaultDataItemTypeRepository
-    ): DataItemTypeRepository
-}
-
-class FakeDataItemTypeRepository @Inject constructor() : DataItemTypeRepository {
-    override val dataItemTypes: Flow<List<String>> = flowOf(fakeDataItemTypes)
-
-    override suspend fun add(name: String) {
-        throw NotImplementedError()
-    }
-}
-
-val fakeDataItemTypes = listOf("One", "Two", "Three")
+//@Module
+//@InstallIn(SingletonComponent::class)
+//interface DataModule {
+//
+//    @Singleton
+//    @Binds
+//    fun bindsDataItemTypeRepository(
+//        dataItemTypeRepository: DefaultDataItemTypeRepository
+//    ): DataItemTypeRepository
+//}
+//
+//class FakeDataItemTypeRepository @Inject constructor() : DataItemTypeRepository {
+//    override val dataItemTypes: Flow<List<String>> = flowOf(fakeDataItemTypes)
+//
+//    override suspend fun add(name: String) {
+//        throw NotImplementedError()
+//    }
+//}
+//
+//val fakeDataItemTypes = listOf("One", "Two", "Three")

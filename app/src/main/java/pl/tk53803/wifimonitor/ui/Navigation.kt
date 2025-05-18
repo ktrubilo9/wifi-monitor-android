@@ -24,13 +24,23 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import pl.tk53803.wifimonitor.ui.dataitemtype.DataItemTypeScreen
+import pl.tk53803.wifimonitor.ui.screens.PermissionRequestScreen
 
 @Composable
 fun MainNavigation() {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "main") {
-        composable("main") { DataItemTypeScreen(modifier = Modifier.padding(16.dp)) }
-        // TODO: Add more destinations
+    NavHost(navController = navController, startDestination = "permissions") {
+        composable("permissions") {
+            PermissionRequestScreen (onPermissionsGranted = {
+                navController.navigate("main") {
+                    popUpTo("permissions") { inclusive = true }
+                }
+            })
+        }
+
+        composable("main") {
+            DataItemTypeScreen(modifier = Modifier.padding(16.dp))
+        }
     }
 }

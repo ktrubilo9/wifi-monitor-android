@@ -16,7 +16,7 @@
 
 package pl.tk53803.wifimonitor.ui.dataitemtype
 
-import pl.tk53803.wifimonitor.ui.theme.MyApplicationTheme
+import pl.tk53803.wifimonitor.ui.theme.AppTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -81,7 +81,7 @@ internal fun DataItemTypeScreen(
 @Preview(showBackground = true)
 @Composable
 private fun DefaultPreview() {
-    MyApplicationTheme {
+    AppTheme {
         DataItemTypeScreen(listOf("Compose", "Room", "Kotlin"), onSave = {})
     }
 }
@@ -89,7 +89,7 @@ private fun DefaultPreview() {
 @Preview(showBackground = true, widthDp = 480)
 @Composable
 private fun PortraitPreview() {
-    MyApplicationTheme {
+    AppTheme {
         DataItemTypeScreen(listOf("Compose", "Room", "Kotlin"), onSave = {})
     }
 }

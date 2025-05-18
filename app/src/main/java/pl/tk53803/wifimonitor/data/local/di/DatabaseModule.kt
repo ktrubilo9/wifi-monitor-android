@@ -23,26 +23,23 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import pl.tk53803.wifimonitor.data.local.database.AppDatabase
-import pl.tk53803.wifimonitor.data.local.database.DataItemTypeDao
+import pl.tk53803.wifimonitor.data.local.database.WifiDatabase
+import pl.tk53803.wifimonitor.data.local.database.WifiInfoDao
 import javax.inject.Singleton
-
 
 @Module
 @InstallIn(SingletonComponent::class)
 class DatabaseModule {
-    @Provides
-    fun provideDataItemTypeDao(appDatabase: AppDatabase): DataItemTypeDao {
-        return appDatabase.dataItemTypeDao()
-    }
 
     @Provides
     @Singleton
-    fun provideAppDatabase(@ApplicationContext appContext: Context): AppDatabase {
-        return Room.databaseBuilder(
-            appContext,
-            AppDatabase::class.java,
-            "DataItemType"
+    fun provideDatabase(@ApplicationContext context: Context): WifiDatabase =
+        Room.databaseBuilder(
+            context,
+            WifiDatabase::class.java,
+            "wifi_database"
         ).build()
-    }
+
+    @Provides
+    fun provideWifiDao(db: WifiDatabase): WifiInfoDao = db.wifiInfoDao()
 }
