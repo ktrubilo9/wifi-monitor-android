@@ -22,14 +22,17 @@ class WifiScanReceiver (
         val res: List<ScanResult> = wifiManager.scanResults
 
         CoroutineScope(Dispatchers.IO).launch {
+            val currentBssids = res.map{ it.BSSID }
+            repository.deleteNotInBssids(currentBssids)
+
             res.forEach { it ->
                 val d = dist(it.level, it.frequency)
                 repository.insert(
                     WifiInfoType(
-                        ssid = it.SSID.ifEmpty { "Unknown" }, //?
+                        ssid = it.SSID.ifEmpty { "Unknown" },
                         bssid = it.BSSID,
                         rssi = it.level,
-                        linkSpeed = wifiManager.connectionInfo.linkSpeed, //to fix?
+                        linkSpeed = wifiManager.connectionInfo.linkSpeed,
                         frequency = it.frequency,
                         estimatedDistance = d
                     )

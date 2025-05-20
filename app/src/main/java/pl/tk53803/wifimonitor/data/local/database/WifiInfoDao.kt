@@ -16,4 +16,7 @@ interface WifiInfoDao {
 
     @Query("SELECT * FROM wifi_info WHERE bssid = :bssid ORDER BY timestamp DESC")
     fun getByBssid(bssid: String): Flow<List<WifiInfoType>>
+
+    @Query("DELETE FROM wifi_info WHERE bssid NOT IN (:bssids)")
+    suspend fun deleteNotInBssids(bssids: List<String>)
 }
