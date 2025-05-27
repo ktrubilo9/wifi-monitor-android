@@ -29,7 +29,7 @@ class WifiScan @Inject constructor(
         scanJob = CoroutineScope(Dispatchers.IO).launch {
             while (true) {
                 wifiManager.startScan()
-                delay(5000)
+                delay(10000)
             }
         }
     }

@@ -22,6 +22,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import dagger.hilt.android.AndroidEntryPoint
+import pl.tk53803.wifimonitor.ui.screens.PermissionRequestScreen
 import pl.tk53803.wifimonitor.ui.service.WifiScan
 import javax.inject.Inject
 
@@ -29,25 +30,29 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     @Inject lateinit var wifiScan: WifiScan
-
-    override fun onStart() {
-        super.onStart()
-        wifiScan.start()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        wifiScan.stop()
-    }
+    private var scanningStarted = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
                 Surface {
-                    MainNavigation()
+                    MainNavigation(
+                        onPermissionsGranted = {
+                            wifiScan.start()
+                            scanningStarted = true
+                        }
+                    )
                 }
             }
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if(scanningStarted) {
+            wifiScan.stop()
+            scanningStarted = false
         }
     }
 }

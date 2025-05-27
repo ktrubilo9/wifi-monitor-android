@@ -1,0 +1,73 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "e877883b190c4be593daf96fd66d0faf",
+    "entities": [
+      {
+        "tableName": "wifi_info",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ssid` TEXT NOT NULL, `bssid` TEXT NOT NULL, `rssi` INTEGER NOT NULL, `link_speed` INTEGER NOT NULL, `frequency` INTEGER NOT NULL, `estimated_distance` REAL NOT NULL, `timestamp` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ssid",
+            "columnName": "ssid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bssid",
+            "columnName": "bssid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rssi",
+            "columnName": "rssi",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "linkSpeed",
+            "columnName": "link_speed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "frequency",
+            "columnName": "frequency",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "estimatedDistance",
+            "columnName": "estimated_distance",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e877883b190c4be593daf96fd66d0faf')"
+    ]
+  }
+}

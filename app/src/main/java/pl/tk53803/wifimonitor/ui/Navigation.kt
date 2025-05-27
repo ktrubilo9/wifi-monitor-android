@@ -11,12 +11,15 @@ import pl.tk53803.wifimonitor.ui.screens.HomeScreen
 import pl.tk53803.wifimonitor.ui.screens.PermissionRequestScreen
 
 @Composable
-fun MainNavigation() {
+fun MainNavigation(
+    onPermissionsGranted: () -> Unit
+) {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = "permissions") {
         composable("permissions") {
             PermissionRequestScreen (onPermissionsGranted = {
+                onPermissionsGranted()
                 navController.navigate("main") {
                     popUpTo("permissions") { inclusive = true }
                 }
@@ -33,11 +36,15 @@ fun MainNavigation() {
             route = "detail/{bssid}",
             arguments = listOf(navArgument("bssid") { type = NavType.StringType })
         ) { backStackEntry ->
-            val bssid = backStackEntry.arguments?.getString("bssid") ?: ""
-            DetailsScreen (
-                bssid = bssid,
-                onBack = { navController.popBackStack() }
-            )
+            val bssid = backStackEntry.arguments?.getString("bssid")
+            if(bssid != null) {
+                DetailsScreen (
+                    bssid = bssid,
+                    onBack = { navController.popBackStack() }
+                )
+            }else {
+                navController.popBackStack()
+            }
         }
     }
 }

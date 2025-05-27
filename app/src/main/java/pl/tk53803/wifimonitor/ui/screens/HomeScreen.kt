@@ -100,7 +100,6 @@ fun HomeScreen(
 
                             Spacer(modifier = Modifier.height(12.dp))
 
-                            // Navigate Button
                             Button(
                                 onClick = { onNavigateToDetail(item.bssid) },
                                 modifier = Modifier.align(Alignment.End)

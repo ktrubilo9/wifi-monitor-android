@@ -97,7 +97,7 @@ fun DetailsScreen(
                         InfoRow(label = "Frequency", value = "${latest.frequency} MHz")
                         InfoRow(label = "Link Speed", value = "${latest.linkSpeed} Mbps")
                         InfoRow(label = "Current RSSI", value = "${latest.rssi} dBm")
-                        InfoRow(label = "Estimated Distance", value = "${latest.estimatedDistance} m")
+                        InfoRow(label = "Estimated Distance", value = "$.2f".format(latest.estimatedDistance))
                     }
                 }
 

@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.*
+import pl.tk53803.wifimonitor.ui.MainNavigation
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -25,11 +26,12 @@ fun PermissionRequestScreen(
         )
     )
 
+    var hasTriggered by remember { mutableStateOf(false) }
+
     LaunchedEffect(permissionsState.allPermissionsGranted) {
-        if (permissionsState.allPermissionsGranted) {
+        if (permissionsState.allPermissionsGranted && !hasTriggered) {
+            hasTriggered = true
             onPermissionsGranted()
-        } else {
-            permissionsState.launchMultiplePermissionRequest()
         }
     }
 

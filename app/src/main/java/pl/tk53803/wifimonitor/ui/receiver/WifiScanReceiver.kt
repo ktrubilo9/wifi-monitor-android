@@ -11,6 +11,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import pl.tk53803.wifimonitor.data.WifiRepository
 import pl.tk53803.wifimonitor.data.local.database.WifiInfoType
+import kotlin.math.log10
+import kotlin.math.pow
 
 class WifiScanReceiver (
     private val wifiManager: WifiManager,
@@ -42,7 +44,15 @@ class WifiScanReceiver (
     }
 
     private fun dist(rssi: Int, freq: Int,): Float{
-        val d = 0
-        return d.toFloat()
+        val freqMhz = freq.toDouble()
+
+        val eirp = when {
+            freq in 2400..2500 -> 20 //2.4 ghz
+            freq in 4900..5900 -> 23 //5 ghz
+            else -> 20
+        }
+        val L = eirp - rssi
+        val exp = (L + 27.55 - (20 * log10(freqMhz))) / 20.0
+        return 10.0.pow(exp).toFloat()
     }
 }
