@@ -85,7 +85,8 @@ dependencies {
     implementation(composeBom)
     androidTestImplementation(composeBom)
 
-    implementation("co.yml:ycharts:2.1.0")
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
 
     //icons
     implementation("androidx.compose.material:material-icons-extended:1.6.0")

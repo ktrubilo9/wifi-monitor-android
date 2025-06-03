@@ -28,6 +28,10 @@ class WifiScan @Inject constructor(
         context.registerReceiver(receiver, IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
         scanJob = CoroutineScope(Dispatchers.IO).launch {
             while (true) {
+                /**
+                 * używam tego tylko dlatego bo jest to deprecated z tego powodu, że
+                 * android chce ograniczyć skanowanie sieciowe do aplikacji i będzie usunięte
+                 */
                 wifiManager.startScan()
                 delay(10000)
             }

@@ -3,26 +3,31 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import co.yml.charts.axis.AxisData
-import co.yml.charts.common.model.Point
-import co.yml.charts.ui.linechart.model.LineChartData
-import co.yml.charts.ui.linechart.model.LinePlotData
-import co.yml.charts.ui.linechart.model.LineStyle
 import pl.tk53803.wifimonitor.ui.screens.WifiViewModel
 import androidx.compose.ui.graphics.Color
-import co.yml.charts.ui.linechart.LineChart
-import co.yml.charts.ui.linechart.model.IntersectionPoint
-import co.yml.charts.ui.linechart.model.SelectionHighlightPoint
-import co.yml.charts.ui.linechart.model.*
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.viewinterop.AndroidView
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,7 +39,7 @@ fun DetailsScreenTopAppBar(
         title = { Text(ssid, maxLines = 1) },
         navigationIcon = {
             IconButton(onClick = onBack) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
         },
         colors = TopAppBarColors(
@@ -53,7 +58,9 @@ fun DetailsScreen(
     viewModel: WifiViewModel = hiltViewModel(),
     onBack: () -> Unit
 ) {
-    val wifiHistory by viewModel.getByBssid(bssid).collectAsState(initial = emptyList())
+    val wifiHistory by viewModel.getSmoothedByBssid(bssid).collectAsState(initial = emptyList())
+    var showRssiPopup by rememberSaveable { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -73,7 +80,7 @@ fun DetailsScreen(
                 Text("No data found", style = MaterialTheme.typography.bodyMedium)
             }
         } else {
-            val latest = wifiHistory.first()
+            val latest = wifiHistory.maxByOrNull { it.timestamp }
 
             Column(
                 modifier = Modifier
@@ -86,18 +93,20 @@ fun DetailsScreen(
                     shape = RoundedCornerShape(12.dp),
                     tonalElevation = 4.dp,
                     modifier = Modifier.fillMaxWidth()
+                        .padding(bottom = 12.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp)
                     ) {
                         Text("Network Details", style = MaterialTheme.typography.titleLarge)
                         Spacer(Modifier.height(12.dp))
-                        InfoRow(label = "SSID", value = latest.ssid)
-                        InfoRow(label = "BSSID", value = latest.bssid)
-                        InfoRow(label = "Frequency", value = "${latest.frequency} MHz")
-                        InfoRow(label = "Link Speed", value = "${latest.linkSpeed} Mbps")
-                        InfoRow(label = "Current RSSI", value = "${latest.rssi} dBm")
-                        InfoRow(label = "Estimated Distance", value = "$.2f".format(latest.estimatedDistance))
+                        InfoRow(label = "SSID", value = latest?.ssid ?: "Unknown")
+                        InfoRow(label = "BSSID", value = latest?.bssid ?: "Unknown")
+                        InfoRow(label = "Frequency", value = "${latest?.frequency} MHz")
+                        InfoRow(label = "Link Speed", value = "${latest?.linkSpeed} Mbps")
+                        InfoRow(label = "Current RSSI", value = "${latest?.rssi} dBm")
+                        InfoRow(label = "Estimated Distance", value = "${"%.2f".format(latest?.estimatedDistance)} m")
                     }
                 }
 
@@ -107,16 +116,46 @@ fun DetailsScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    tonalElevation = 2.dp,
+                    shape = RoundedCornerShape(16.dp),
+                    tonalElevation = 4.dp,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(240.dp)
+                        .height(240.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer
                 ) {
-                    RssiChart(rssiValues = wifiHistory.map { it.rssi }, modifier = Modifier.padding(8.dp))
+                    RssiChart(rssiValues = wifiHistory.map { it.rssi }, modifier = Modifier.padding(12.dp))
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+                Text("Actions", style = MaterialTheme.typography.titleMedium)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedButton(onClick = {
+                        showRssiPopup = true
+                    }) {
+                        Text("Rssi list")
+                    }
+
+                    OutlinedButton(onClick = {
+                        coroutineScope.launch {
+                            viewModel.deleteOldData(bssid)
+                        }
+                    }) {
+                        Text("Clear")
+                    }
                 }
             }
         }
+    }
+    if (showRssiPopup) {
+        RssiListPopup(
+            rssiValues = wifiHistory.map { it.rssi },
+            onDismiss = { showRssiPopup = false }
+        )
     }
 }
 
@@ -135,52 +174,79 @@ private fun InfoRow(label: String, value: String) {
 
 @Composable
 fun RssiChart(rssiValues: List<Int>, modifier: Modifier = Modifier) {
-    val points = rssiValues.mapIndexed { index, value ->
-        Point(index.toFloat(), value.toFloat())
-    }
+    val context = LocalContext.current
+    val trimmedRssiValues = rssiValues
+        .takeLast(60)
 
-    val xAxisData = AxisData.Builder()
-        .axisStepSize(30.dp)
-        .backgroundColor(MaterialTheme.colorScheme.surface)
-        .steps(points.size.coerceAtMost(10))
-        .labelData { i -> "$i" }
-        .labelAndAxisLinePadding(10.dp)
-        .axisLabelColor(MaterialTheme.colorScheme.onSurface)
-        .build()
+    AndroidView(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(300.dp),
+        factory = {
+            LineChart(context).apply {
+                description.isEnabled = false
+                setTouchEnabled(true)
+                isDragEnabled = true
+                setScaleEnabled(true)
+                setPinchZoom(true)
+                axisRight.isEnabled = false
 
-    val yAxisData = AxisData.Builder()
-        .steps(6)
-        .labelAndAxisLinePadding(10.dp)
-        .labelData { i -> "${-i * 10} dBm" }
-        .axisLabelColor(MaterialTheme.colorScheme.onSurface)
-        .build()
+                xAxis.position = XAxis.XAxisPosition.BOTTOM
+                xAxis.granularity = 1f
+                xAxis.setDrawGridLines(false)
 
-    val lineChartData = LineChartData(
-        linePlotData = LinePlotData(
-            lines = listOf(
-                Line(
-                    dataPoints = points,
-                    lineStyle = LineStyle(color = Color.Red),
-                    intersectionPoint = IntersectionPoint(
-                        color = Color.Red,
-                        radius = 4.dp
-                    ),
-                    selectionHighlightPoint = SelectionHighlightPoint(
-                        color = Color.Red,
-                        radius = 6.dp
-                    )
-                )
-            )
-        ),
-        xAxisData = xAxisData,
-        yAxisData = yAxisData,
-        backgroundColor = MaterialTheme.colorScheme.surface,
-        paddingRight = 12.dp,
-        paddingTop = 12.dp
+                axisLeft.apply {
+                    axisMinimum = -100f
+                    axisMaximum = -10f
+                    granularity = 10f
+                    setDrawGridLines(true)
+                }
+            }
+        },
+        update = { chart ->
+            val entries = trimmedRssiValues.mapIndexed { i, rssi ->
+                Entry(i.toFloat(), rssi.toFloat())
+            }
+
+            val dataSet = LineDataSet(entries, "RSSI").apply {
+                color = Color.Red.toArgb()
+                valueTextColor = Color.Black.toArgb()
+                lineWidth = 2f
+                circleRadius = 3f
+                setDrawValues(false)
+            }
+
+            chart.data = LineData(dataSet)
+            chart.invalidate()
+        }
     )
+}
 
-    LineChart(
-        modifier = modifier,
-        lineChartData = lineChartData
+@Composable
+fun RssiListPopup(
+    rssiValues: List<Int>,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
+        },
+        title = {
+            Text(text = "RSSI History")
+        },
+        text = {
+            Column(modifier = Modifier
+                .heightIn(max = 300.dp)
+                .verticalScroll(rememberScrollState())
+            ) {
+                rssiValues.forEachIndexed { index, rssi ->
+                    Text(text = "[$index] RSSI: $rssi dBm")
+                    HorizontalDivider()
+                }
+            }
+        }
     )
 }

@@ -18,11 +18,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/> <!-- Wymagane bylo do fine location -->
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/> <!-- pozwala aplikacji na odczyt informacji o stanie wifi -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/> <!-- pozwala sprawdzić stan wszystkich połączeń sieciowych -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/> <!-- pozwala na okreslenie lokalizacji -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/> <!-- wymagane bylo do fine location (mniejsza dokladnosc) -->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>  <!-- pozwala aplikacji włączać/wyłączać wifi-->
     <application
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"

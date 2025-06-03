@@ -12,4 +12,5 @@ class WifiRepository @Inject constructor(
     suspend fun deleteNotInBssids(bssids: List<String>) = dao.deleteNotInBssids(bssids)
     fun getAll(): Flow<List<WifiInfoType>> = dao.getAll()
     fun getByBssid(bssid: String): Flow<List<WifiInfoType>> = dao.getByBssid(bssid)
+    suspend fun deleteOldData(bssid: String) = dao.deleteOldData(bssid)
 }

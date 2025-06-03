@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import pl.tk53803.wifimonitor.data.WifiRepository
 import pl.tk53803.wifimonitor.data.local.database.WifiInfoType
+import kotlin.math.abs
 import kotlin.math.log10
 import kotlin.math.pow
 
@@ -31,9 +32,17 @@ class WifiScanReceiver (
                 val d = dist(it.level, it.frequency)
                 repository.insert(
                     WifiInfoType(
+                        /*
+                            używam tego aby dostać ssid wszystkich sieci,
+                            kotlin proponuje getWifiSsid, które zwraca tylko SSID aktualnej sieci
+                         */
                         ssid = it.SSID.ifEmpty { "Unknown" },
                         bssid = it.BSSID,
                         rssi = it.level,
+                        /*
+                            podobnie jak dla ssid, można dostać linkSpeed wszystkich sieci,
+                            a kotlin proponuje rozwiazanie które zwraca tylko linkSpeed aktualnej sieci
+                         */
                         linkSpeed = wifiManager.connectionInfo.linkSpeed,
                         frequency = it.frequency,
                         estimatedDistance = d
@@ -43,16 +52,10 @@ class WifiScanReceiver (
         }
     }
 
+    // metoda do wyliczania odległości
     private fun dist(rssi: Int, freq: Int,): Float{
         val freqMhz = freq.toDouble()
-
-        val eirp = when {
-            freq in 2400..2500 -> 20 //2.4 ghz
-            freq in 4900..5900 -> 23 //5 ghz
-            else -> 20
-        }
-        val L = eirp - rssi
-        val exp = (L + 27.55 - (20 * log10(freqMhz))) / 20.0
-        return 10.0.pow(exp).toFloat()
+        val exponent = (27.55 - (20 * log10(freqMhz)) + abs(rssi)) / 20.0
+        return 10.0.pow(exponent).toFloat()
     }
 }

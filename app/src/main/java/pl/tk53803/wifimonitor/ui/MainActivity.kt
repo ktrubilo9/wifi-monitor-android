@@ -22,7 +22,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import dagger.hilt.android.AndroidEntryPoint
-import pl.tk53803.wifimonitor.ui.screens.PermissionRequestScreen
 import pl.tk53803.wifimonitor.ui.service.WifiScan
 import javax.inject.Inject
 

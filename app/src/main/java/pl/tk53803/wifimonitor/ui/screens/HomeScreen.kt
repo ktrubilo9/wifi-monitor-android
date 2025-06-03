@@ -20,20 +20,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.res.stringResource
 import pl.tk53803.wifimonitor.R
-import pl.tk53803.wifimonitor.ui.screens.WifiViewModel
 
 @Composable
 fun HomeScreen(
     viewModel: WifiViewModel = hiltViewModel(),
     onNavigateToDetail: (String) -> Unit
 ) {
-    val wifilist by viewModel.wifiHistory.collectAsState()
+    val wifiList by viewModel.smoothedLatest.collectAsState()
     var expandedBssid by rememberSaveable { mutableStateOf<String?>(null) }
-
-    val filteredList = remember(wifilist) {
-        wifilist.distinctBy { it.bssid }
-            .sortedByDescending { it.rssi }
-    }
 
     Scaffold (
         modifier = Modifier.Companion.fillMaxSize(),
@@ -49,7 +43,7 @@ fun HomeScreen(
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
             items(
-                items = filteredList,
+                items = wifiList,
                 key= { it.bssid }
             ) { item ->
                 val isExpanded = expandedBssid == item.bssid
@@ -80,7 +74,7 @@ fun HomeScreen(
                             Column(modifier = Modifier.weight(1f)) {
                                 Text("SSID: ${item.ssid}", style = MaterialTheme.typography.titleMedium)
                                 Text("RSSI: ${item.rssi} dBm", style = MaterialTheme.typography.bodySmall)
-                                Text("Distance: ${item.estimatedDistance} m", style = MaterialTheme.typography.bodySmall)
+                                Text("Distance: ${"%.2f".format(item.estimatedDistance)} m", style = MaterialTheme.typography.bodySmall)
                             }
                             Icon(
                                 imageVector = Icons.Default.KeyboardArrowDown,
