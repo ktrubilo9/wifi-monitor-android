@@ -52,10 +52,19 @@ class WifiScanReceiver (
         }
     }
 
+    private fun dampinginfreespace(freq: Int, dist: Float) : Double {
+        return -27.55 + 20 * log10(freq.toFloat()) + 20 * log10(dist.toFloat())
+    }
+
     // metoda do wyliczania odległości
     private fun dist(rssi: Int, freq: Int,): Float{
-        val freqMhz = freq.toDouble()
-        val exponent = (27.55 - (20 * log10(freqMhz)) + abs(rssi)) / 20.0
+        var temp = -rssi
+        if(freq < 3000)
+            temp += 20
+        else temp += 23
+
+        val y = 4
+        val exponent = (temp - dampinginfreespace(freq, 1f)) / (10 * y)
         return 10.0.pow(exponent).toFloat()
     }
 }

@@ -33,7 +33,7 @@ class WifiScan @Inject constructor(
                  * android chce ograniczyć skanowanie sieciowe do aplikacji i będzie usunięte
                  */
                 wifiManager.startScan()
-                delay(10000)
+                delay(4000)
             }
         }
     }
