@@ -1,3 +1,4 @@
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -15,18 +16,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import pl.tk53803.wifimonitor.ui.screens.WifiViewModel
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.viewinterop.AndroidView
-import com.github.mikephil.charting.charts.LineChart
-import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -174,52 +169,64 @@ private fun InfoRow(label: String, value: String) {
 
 @Composable
 fun RssiChart(rssiValues: List<Int>, modifier: Modifier = Modifier) {
-    val context = LocalContext.current
     val trimmedRssiValues = rssiValues
         .takeLast(60)
+    val lineColor = MaterialTheme.colorScheme.primary
+    val gridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f)
 
-    AndroidView(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(300.dp),
-        factory = {
-            LineChart(context).apply {
-                description.isEnabled = false
-                setTouchEnabled(true)
-                isDragEnabled = true
-                setScaleEnabled(true)
-                setPinchZoom(true)
-                axisRight.isEnabled = false
-
-                xAxis.position = XAxis.XAxisPosition.BOTTOM
-                xAxis.granularity = 1f
-                xAxis.setDrawGridLines(false)
-
-                axisLeft.apply {
-                    axisMinimum = -100f
-                    axisMaximum = -10f
-                    granularity = 10f
-                    setDrawGridLines(true)
-                }
-            }
-        },
-        update = { chart ->
-            val entries = trimmedRssiValues.mapIndexed { i, rssi ->
-                Entry(i.toFloat(), rssi.toFloat())
-            }
-
-            val dataSet = LineDataSet(entries, "RSSI").apply {
-                color = Color.Red.toArgb()
-                valueTextColor = Color.Black.toArgb()
-                lineWidth = 2f
-                circleRadius = 3f
-                setDrawValues(false)
-            }
-
-            chart.data = LineData(dataSet)
-            chart.invalidate()
+    Canvas(modifier = modifier.fillMaxSize()) {
+        repeat(10) { index ->
+            val y = size.height * index / 9f
+            drawLine(
+                color = gridColor,
+                start = Offset(0f, y),
+                end = Offset(size.width, y),
+                strokeWidth = 1f
+            )
         }
-    )
+
+        if (trimmedRssiValues.isEmpty()) {
+            return@Canvas
+        }
+
+        val path = Path()
+        val xStep = if (trimmedRssiValues.size > 1) {
+            size.width / (trimmedRssiValues.size - 1)
+        } else {
+            0f
+        }
+
+        trimmedRssiValues.forEachIndexed { index, rssi ->
+            val normalized = (rssi.coerceIn(-100, -10) + 100) / 90f
+            val point = Offset(
+                x = index * xStep,
+                y = size.height * (1f - normalized)
+            )
+
+            if (index == 0) {
+                path.moveTo(point.x, point.y)
+            } else {
+                path.lineTo(point.x, point.y)
+            }
+        }
+
+        drawPath(
+            path = path,
+            color = lineColor,
+            style = Stroke(width = 3f)
+        )
+
+        val lastRssi = trimmedRssiValues.last()
+        val lastNormalized = (lastRssi.coerceIn(-100, -10) + 100) / 90f
+        drawCircle(
+            color = lineColor,
+            radius = 6f,
+            center = Offset(
+                x = (trimmedRssiValues.lastIndex * xStep),
+                y = size.height * (1f - lastNormalized)
+            )
+        )
+    }
 }
 
 @Composable

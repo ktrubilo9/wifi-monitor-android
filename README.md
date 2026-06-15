@@ -50,7 +50,7 @@ Hilt provides the Android and data-layer dependencies.
 - Room
 - Hilt
 - Navigation Compose
-- MPAndroidChart
+- Compose Canvas
 - JUnit and coroutine testing utilities
 - Gradle version catalog
 
