@@ -29,6 +29,6 @@ dependencyResolutionManagement {
         maven { url = uri("https://jitpack.io") }
     }
 }
-rootProject.name = "WifiMonitorApp"
+rootProject.name = "WifiMonitor"
 
 include(":app")
